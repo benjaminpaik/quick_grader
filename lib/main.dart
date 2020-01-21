@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quick_grader/screens/students_page.dart';
 import 'models/grades_model.dart';
-import 'screens/sign_in_page.dart';
+import 'screens/login_page.dart';
 import 'screens/sheet_selector_page.dart';
 
 void main() => runApp(new QuickGrade());
@@ -21,8 +22,9 @@ class QuickGrade extends StatelessWidget {
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => HomePage(title: 'Login Page'),
-          '/sheets': (context) => SheetSelectorWidget(),
+          '/': (context) => LoginScreen(title: 'Login Screen'),
+          '/sheets': (context) => SheetSelectorScreen(title: 'Sheets Screen',),
+          '/grades': (context) => StudentsScreen(title: 'Students Screen',),
         },
       ),
     );

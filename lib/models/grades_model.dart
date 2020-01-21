@@ -47,8 +47,7 @@ class SheetSelectorModel extends ChangeNotifier {
 
   SheetSelectorModel() : _currentUser = null;
 
-  UnmodifiableListView<File> get sheetList =>
-      UnmodifiableListView(_items);
+  UnmodifiableListView<File> get sheetList => UnmodifiableListView(_items);
 
   Future<void> signInSilently(BuildContext context) async {
     var account = await AuthManager.signInSilently();
@@ -73,19 +72,15 @@ class SheetSelectorModel extends ChangeNotifier {
     if (_currentUser == null) return;
 
     GoogleSignInAuthentication authentication =
-    await _currentUser.authentication;
+        await _currentUser.authentication;
     print('authentication: $authentication');
     final client = MyClient(defaultHeaders: {
       'Authorization': 'Bearer ${authentication.accessToken}'
     });
     DriveApi driveApi = DriveApi(client);
-    var files = await driveApi.files.list(q: 'mimeType=\'application/vnd.google-apps.spreadsheet\'');
+    var files = await driveApi.files
+        .list(q: 'mimeType=\'application/vnd.google-apps.spreadsheet\'');
     _items = files.items;
     notifyListeners();
   }
 }
-
-class GradesModel extends ChangeNotifier {
-
-}
-
