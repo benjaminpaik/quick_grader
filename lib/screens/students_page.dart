@@ -12,6 +12,9 @@ class StudentsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: <Widget>[
+          _AssignmentSelector(),
+        ],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -26,17 +29,18 @@ class _StudentListWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SheetSelectorModel>(
       builder: (context, sheetSelectorModel, child) {
-        final sheetList = sheetSelectorModel.sheetList;
+        final spreadSheetValues = sheetSelectorModel.spreadSheet.values.sublist(1);
         return ListView.builder(
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             padding: EdgeInsets.all(0.0),
-            itemCount: sheetList.length,
+            itemCount: spreadSheetValues.length,
             itemBuilder: (BuildContext context, int index) {
-              if (index < sheetList.length) {
+              if (index < spreadSheetValues.length) {
                 return GestureDetector(
                   key: ObjectKey(index),
-                  child: _StudentWidget(index, sheetList[index].title),
+                  child: _StudentWidget(
+                      index, spreadSheetValues[index].first.toString()),
                 );
               } else {
                 return null;
@@ -49,7 +53,7 @@ class _StudentListWidget extends StatelessWidget {
 
 class _StudentWidget extends StatelessWidget {
   static final _taskFont =
-  const TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold);
+      const TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold);
   final String text;
   final int index;
 
@@ -74,5 +78,34 @@ class _StudentWidget extends StatelessWidget {
         height: 0.0,
       ),
     ]);
+  }
+}
+
+class _AssignmentSelector extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final sheetSelectorModel = Provider.of<SheetSelectorModel>(context);
+    final assignments = sheetSelectorModel.assignmentList;
+
+    return DropdownButton<String>(
+      value: sheetSelectorModel.assignmentSelection,
+      icon: Icon(Icons.arrow_downward),
+      iconSize: 24,
+      elevation: 16,
+      style: TextStyle(color: Colors.deepPurple),
+      underline: Container(
+        height: 2,
+        color: Colors.deepPurpleAccent,
+      ),
+      onChanged: (String newValue) {
+        sheetSelectorModel.assignmentSelection = newValue;
+      },
+      items: assignments.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
   }
 }
