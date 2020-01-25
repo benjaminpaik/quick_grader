@@ -7,6 +7,9 @@ import 'package:googleapis/sheets/v4.dart';
 
 import 'my_client.dart';
 
+final _sheetsRoute = '/sheets';
+final _gradesRoute = '/grades';
+
 final _sheetRange = 'Sheet1';
 final _baseRow = 2;
 final _baseColumn = 1;
@@ -52,6 +55,7 @@ class SheetSelectorModel extends ChangeNotifier {
   ValueRange _spreadSheet;
   List<File> _files = [];
   List<String> _assignmentList = [];
+  List<String> _gradesList = [];
   int _assignmentSelectionIndex;
   SheetsApi _sheetsApi;
 
@@ -65,16 +69,31 @@ class SheetSelectorModel extends ChangeNotifier {
   ValueRange get spreadSheet => _spreadSheet;
   List<String> get assignmentList => _assignmentList;
   String get selectedAssignment {
-    if(_assignmentSelectionIndex >= 0) {
+    if (_assignmentSelectionIndex >= 0) {
       return _assignmentList[_assignmentSelectionIndex];
-    }
-    else {
+    } else {
       return null;
     }
   }
+  List<String> get gradesList => _gradesList;
 
-  set selectedAssignment(String selection) {
+  void setSelectedAssignment(String selection) async {
     _assignmentSelectionIndex = _assignmentList.indexOf(selection);
+    if (_assignmentSelectionIndex >= 0) {
+
+      _spreadSheet =
+          await _sheetsApi.spreadsheets.values.get(_fileId, _sheetRange);
+      _assignmentList = _spreadSheet.values.first
+          .sublist(1)
+          .map((val) => val.toString())
+          .toList();
+
+      int rowIndex = _assignmentSelectionIndex + 1;
+      _gradesList = _spreadSheet.values
+          .sublist(1)
+          .map((row) => row[rowIndex].toString().trim())
+          .toList();
+    }
     notifyListeners();
   }
 
@@ -83,7 +102,7 @@ class SheetSelectorModel extends ChangeNotifier {
     _currentUser = account;
     if (account != null) {
       _loadFiles();
-      Navigator.pushReplacementNamed(context, '/sheets');
+      Navigator.pushReplacementNamed(context, _sheetsRoute);
     }
   }
 
@@ -92,7 +111,7 @@ class SheetSelectorModel extends ChangeNotifier {
     _currentUser = account;
     if (account != null) {
       _loadFiles();
-      Navigator.pushReplacementNamed(context, '/sheets');
+      Navigator.pushReplacementNamed(context, _sheetsRoute);
     }
   }
 
@@ -125,13 +144,13 @@ class SheetSelectorModel extends ChangeNotifier {
     _fileId = fileId;
     _sheetsApi = SheetsApi(client);
     _spreadSheet =
-        await _sheetsApi.spreadsheets.values.get(fileId, _sheetRange);
+        await _sheetsApi.spreadsheets.values.get(_fileId, _sheetRange);
     _assignmentList = _spreadSheet.values.first
         .sublist(1)
         .map((val) => val.toString())
         .toList();
 
-    Navigator.pushNamed(context, '/grades');
+    Navigator.pushNamed(context, _gradesRoute);
     notifyListeners();
   }
 
@@ -148,10 +167,12 @@ class SheetSelectorModel extends ChangeNotifier {
       ]
     });
 
-    String range = _getRange(_assignmentSelectionIndex, studentIndex);
-    if(range != null) {
+    String writeRange = _getRange(_assignmentSelectionIndex, studentIndex);
+    if (writeRange != null) {
       _sheetsApi.spreadsheets.values
-          .update(vr, _fileId, range, valueInputOption: "USER_ENTERED");
+          .update(vr, _fileId, writeRange, valueInputOption: "USER_ENTERED");
+      _gradesList[studentIndex] = value.toString();
+      notifyListeners();
     }
   }
 }
@@ -159,7 +180,7 @@ class SheetSelectorModel extends ChangeNotifier {
 String _getRange(int assignmentIndex, int studentIndex) {
   String rangeString;
   // make sure both indices are valid
-  if(assignmentIndex >= 0 && studentIndex >= 0) {
+  if (assignmentIndex >= 0 && studentIndex >= 0) {
     String columnLetter = _getColumnLetter(_baseColumn + assignmentIndex);
     int rowNumber = _baseRow + studentIndex;
     rangeString = columnLetter + rowNumber.toString();
@@ -169,8 +190,9 @@ String _getRange(int assignmentIndex, int studentIndex) {
 
 String _getColumnLetter(int value) {
   int charCode = value + 65;
-  if(charCode < 65) charCode = 65;
-  else if(charCode > 90) charCode = 90;
+  if (charCode < 65)
+    charCode = 65;
+  else if (charCode > 90) charCode = 90;
   String temp = String.fromCharCode(charCode);
   return temp;
 }

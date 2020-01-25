@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:googleapis/chat/v1.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_grader/models/grades_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class StudentsScreen extends StatelessWidget {
   final String title;
@@ -41,8 +41,8 @@ class _StudentListWidget extends StatelessWidget {
               if (index < spreadSheetValues.length) {
                 return GestureDetector(
                   key: ObjectKey(index),
-                  child: _StudentWidget(
-                      index, spreadSheetValues[index].first.toString()),
+                  child: _StudentWidget(index,
+                      spreadSheetValues[index].first.toString().toUpperCase()),
                 );
               } else {
                 return null;
@@ -54,8 +54,8 @@ class _StudentListWidget extends StatelessWidget {
 }
 
 class _StudentWidget extends StatelessWidget {
-  static final _taskFont =
-      const TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold);
+  static final _studentFont =
+      GoogleFonts.iBMPlexMono(fontWeight: FontWeight.w500);
   static final _buttonHeight = 75.0;
   final String text;
   final int studentIndex;
@@ -68,7 +68,7 @@ class _StudentWidget extends StatelessWidget {
       ListTile(
         title: Text(
           text,
-          style: _taskFont,
+          style: _studentFont,
           textAlign: TextAlign.center,
         ),
       ),
@@ -81,9 +81,11 @@ class _StudentWidget extends StatelessWidget {
 }
 
 class _GradeButtonWidget extends StatelessWidget {
+  static final _buttonFont = GoogleFonts.iBMPlexMono();
+  static final _defaultColor = const Color(0xFFF5F5F5);
+  static final _selectedColor = const Color(0xFF9E9E9E);
+  static final _buttonNames = const ["LOW", "MED", "HIGH"];
   final studentIndex;
-  final buttonNames = ["Low", "Med", "High"];
-  final buttonColors = [Colors.red, Colors.yellow, Colors.green];
 
   _GradeButtonWidget(this.studentIndex);
 
@@ -93,15 +95,27 @@ class _GradeButtonWidget extends StatelessWidget {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
-        itemCount: buttonNames.length,
+        itemCount: _buttonNames.length,
         itemBuilder: (BuildContext context, int buttonIndex) {
-          if (buttonIndex < buttonNames.length) {
-            return OutlineButton(
+          final sheetSelectorModel =
+              Provider.of<SheetSelectorModel>(context, listen: true);
+          final gradesList = sheetSelectorModel.gradesList;
+
+          if (buttonIndex < _buttonNames.length) {
+            var buttonColor = _defaultColor;
+            if (studentIndex < gradesList.length &&
+                gradesList[studentIndex] == buttonIndex.toString()) {
+              buttonColor = _selectedColor;
+            }
+
+            return RaisedButton(
               padding: EdgeInsets.all(0.0),
-              child: Text(buttonNames[buttonIndex]),
-              disabledBorderColor: buttonColors[buttonIndex],
+              child: Text(
+                _buttonNames[buttonIndex],
+                style: _buttonFont,
+              ),
+              color: buttonColor,
               onPressed: () {
-                final sheetSelectorModel = Provider.of<SheetSelectorModel>(context, listen: false);
                 sheetSelectorModel.assignGrade(studentIndex, buttonIndex);
               },
             );
@@ -154,13 +168,13 @@ class _AssignmentSelector extends StatelessWidget {
       icon: Icon(Icons.arrow_downward),
       iconSize: 24,
       elevation: 16,
-      style: TextStyle(color: Colors.deepPurple),
+      style: TextStyle(color: Colors.grey),
       underline: Container(
         height: 2,
-        color: Colors.deepPurpleAccent,
+        color: Colors.black,
       ),
       onChanged: (String newValue) {
-        sheetSelectorModel.selectedAssignment = newValue;
+        sheetSelectorModel.setSelectedAssignment(newValue);
       },
       items: assignments.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(

@@ -18,13 +18,13 @@ class QuickGrade extends StatelessWidget {
       child: MaterialApp(
         title: 'Quick Grader',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primaryColor: Colors.black,
         ),
         initialRoute: '/',
         routes: {
-          '/': (context) => LoginScreen(title: 'Login Screen'),
-          '/sheets': (context) => SheetSelectorScreen(title: 'Sheets Screen',),
-          '/grades': (context) => StudentsScreen(title: 'Students Screen',),
+          '/': (context) => LoginScreen(title: 'LOGIN'),
+          '/sheets': (context) => SheetSelectorScreen(title: 'SHEETS',),
+          '/grades': (context) => StudentsScreen(title: 'STUDENTS',),
         },
       ),
     );
