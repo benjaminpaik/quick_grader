@@ -86,43 +86,32 @@ class _GradeButtonWidget extends StatelessWidget {
   static final _selectedColor = const Color(0xFF9E9E9E);
   static final _buttonNames = const ["LOW", "MED", "HIGH"];
   final studentIndex;
-
+  var assignmentGrade = 0;
   _GradeButtonWidget(this.studentIndex);
 
   @override
   Widget build(BuildContext context) {
+
+    final sheetSelectorModel =
+    Provider.of<SheetSelectorModel>(context, listen: true);
+    final gradeList = sheetSelectorModel.gradesList;
+    if(studentIndex < gradeList.length) {
+      assignmentGrade = gradeList[studentIndex];
+    }
+
     return Container(
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemCount: _buttonNames.length,
-        itemBuilder: (BuildContext context, int buttonIndex) {
-          final sheetSelectorModel =
-              Provider.of<SheetSelectorModel>(context, listen: true);
-          final gradesList = sheetSelectorModel.gradesList;
-
-          if (buttonIndex < _buttonNames.length) {
-            var buttonColor = _defaultColor;
-            if (studentIndex < gradesList.length &&
-                gradesList[studentIndex] == buttonIndex.toString()) {
-              buttonColor = _selectedColor;
-            }
-
-            return RaisedButton(
-              padding: EdgeInsets.all(0.0),
-              child: Text(
-                _buttonNames[buttonIndex],
-                style: _buttonFont,
-              ),
-              color: buttonColor,
-              onPressed: () {
-                sheetSelectorModel.assignGrade(studentIndex, buttonIndex);
-              },
-            );
-          } else {
-            return null;
-          }
+      child: Slider(
+        onChanged: (value) {
+          sheetSelectorModel.updateGrade(studentIndex, value.round());
         },
+        onChangeEnd: (value) {
+          sheetSelectorModel.assignGrade(studentIndex, value.round());
+        },
+        min: 0.0,
+        max: 100.0,
+        divisions: 100,
+        value: assignmentGrade.toDouble(),
+        label: assignmentGrade.toString(),
       ),
     );
   }

@@ -55,7 +55,7 @@ class SheetSelectorModel extends ChangeNotifier {
   ValueRange _spreadSheet;
   List<File> _files = [];
   List<String> _assignmentList = [];
-  List<String> _gradesList = [];
+  List<int> _gradesList = [];
   int _assignmentSelectionIndex;
   SheetsApi _sheetsApi;
 
@@ -75,7 +75,7 @@ class SheetSelectorModel extends ChangeNotifier {
       return null;
     }
   }
-  List<String> get gradesList => _gradesList;
+  List<int> get gradesList => _gradesList;
 
   void setSelectedAssignment(String selection) async {
     _assignmentSelectionIndex = _assignmentList.indexOf(selection);
@@ -91,7 +91,7 @@ class SheetSelectorModel extends ChangeNotifier {
       int rowIndex = _assignmentSelectionIndex + 1;
       _gradesList = _spreadSheet.values
           .sublist(1)
-          .map((row) => row[rowIndex].toString().trim())
+          .map((row) => int.parse(row[rowIndex].toString().trim()))
           .toList();
     }
     notifyListeners();
@@ -155,7 +155,7 @@ class SheetSelectorModel extends ChangeNotifier {
   }
 
   Future<void> assignGrade(int studentIndex, int value) async {
-    if (_currentUser == null) return;
+    if (_currentUser == null || _assignmentSelectionIndex < 0) return;
 
     GoogleSignInAuthentication authentication =
         await _currentUser.authentication;
@@ -171,11 +171,20 @@ class SheetSelectorModel extends ChangeNotifier {
     if (writeRange != null) {
       _sheetsApi.spreadsheets.values
           .update(vr, _fileId, writeRange, valueInputOption: "USER_ENTERED");
-      _gradesList[studentIndex] = value.toString();
+      _gradesList[studentIndex] = value;
+      notifyListeners();
+    }
+  }
+
+  void updateGrade(int studentIndex, int value) async {
+    if(_assignmentSelectionIndex >= 0) {
+      _gradesList[studentIndex] = value;
       notifyListeners();
     }
   }
 }
+
+
 
 String _getRange(int assignmentIndex, int studentIndex) {
   String rangeString;
