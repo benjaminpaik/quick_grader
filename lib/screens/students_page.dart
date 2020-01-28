@@ -28,21 +28,20 @@ class StudentsScreen extends StatelessWidget {
 class _StudentListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SheetSelectorModel>(
-      builder: (context, sheetSelectorModel, child) {
-        final spreadSheetValues =
-            sheetSelectorModel.spreadSheet.values.sublist(1);
+    return Selector<SheetSelectorModel, List<List<Object>>>(
+      selector: (_, sheetSelectorModel) =>
+          sheetSelectorModel.spreadSheet.values.sublist(1),
+      builder: (context, students, child) {
         return ListView.builder(
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
             padding: EdgeInsets.all(0.0),
-            itemCount: spreadSheetValues.length,
+            itemCount: students.length,
             itemBuilder: (BuildContext context, int index) {
-              if (index < spreadSheetValues.length) {
+              if (index < students.length) {
                 return GestureDetector(
                   key: ObjectKey(index),
-                  child: _StudentWidget(index,
-                      spreadSheetValues[index].first.toString().toUpperCase()),
+                  child: _StudentWidget(index, students[index].first.toString().toUpperCase()),
                 );
               } else {
                 return null;
@@ -72,7 +71,7 @@ class _StudentWidget extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
       ),
-      SizedBox(height: _buttonHeight, child: _GradeButtonWidget(studentIndex)),
+      SizedBox(height: _buttonHeight, child: _GradeSliderWidget(studentIndex)),
       Divider(
         height: 20.0,
       ),
@@ -80,40 +79,68 @@ class _StudentWidget extends StatelessWidget {
   }
 }
 
-class _GradeButtonWidget extends StatelessWidget {
-  static final _buttonFont = GoogleFonts.iBMPlexMono();
-  static final _defaultColor = const Color(0xFFF5F5F5);
-  static final _selectedColor = const Color(0xFF9E9E9E);
-  static final _buttonNames = const ["LOW", "MED", "HIGH"];
+class _GradeSliderWidget extends StatelessWidget {
   final studentIndex;
-  var assignmentGrade = 0;
-  _GradeButtonWidget(this.studentIndex);
+  _GradeSliderWidget(this.studentIndex);
 
   @override
   Widget build(BuildContext context) {
-
     final sheetSelectorModel =
-    Provider.of<SheetSelectorModel>(context, listen: true);
-    final gradeList = sheetSelectorModel.gradesList;
-    if(studentIndex < gradeList.length) {
-      assignmentGrade = gradeList[studentIndex];
-    }
+        Provider.of<SheetSelectorModel>(context, listen: false);
 
-    return Container(
-      child: Slider(
-        onChanged: (value) {
-          sheetSelectorModel.updateGrade(studentIndex, value.round());
-        },
-        onChangeEnd: (value) {
-          sheetSelectorModel.assignGrade(studentIndex, value.round());
-        },
-        min: 0.0,
-        max: 100.0,
-        divisions: 100,
-        value: assignmentGrade.toDouble(),
-        label: assignmentGrade.toString(),
-      ),
+    return Selector<SheetSelectorModel, int>(
+      selector: (_, sheetSelectorModel) =>
+          sheetSelectorModel.getGrade(studentIndex),
+      builder: (context, grade, child) {
+        return Slider(
+          onChanged: (value) {
+            sheetSelectorModel.updateGrade(studentIndex, value.round());
+          },
+          onChangeEnd: (value) {
+            sheetSelectorModel.assignGrade(studentIndex, value.round());
+          },
+          min: 0.0,
+          max: 100.0,
+          divisions: 100,
+          value: grade.toDouble(),
+          label: grade.toString(),
+        );
+      },
     );
+  }
+}
+
+class _AssignmentSelector extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final sheetSelectorModel =
+        Provider.of<SheetSelectorModel>(context, listen: false);
+    return Selector<SheetSelectorModel, String>(
+        selector: (_, sheetSelectorModel) =>
+            sheetSelectorModel.selectedAssignment,
+        builder: (context, selectedAssignment, child) {
+          return DropdownButton<String>(
+            value: selectedAssignment,
+            icon: Icon(Icons.arrow_downward),
+            iconSize: 24,
+            elevation: 16,
+            style: TextStyle(color: Colors.grey),
+            underline: Container(
+              height: 2,
+              color: Colors.black,
+            ),
+            onChanged: (String newValue) {
+              sheetSelectorModel.setSelectedAssignment(newValue);
+            },
+            items: sheetSelectorModel.assignmentList
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          );
+        });
   }
 }
 
@@ -145,32 +172,3 @@ class _StudentRowWidget extends StatelessWidget {
   }
 }
  */
-
-class _AssignmentSelector extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final sheetSelectorModel = Provider.of<SheetSelectorModel>(context);
-    final assignments = sheetSelectorModel.assignmentList;
-
-    return DropdownButton<String>(
-      value: sheetSelectorModel.selectedAssignment,
-      icon: Icon(Icons.arrow_downward),
-      iconSize: 24,
-      elevation: 16,
-      style: TextStyle(color: Colors.grey),
-      underline: Container(
-        height: 2,
-        color: Colors.black,
-      ),
-      onChanged: (String newValue) {
-        sheetSelectorModel.setSelectedAssignment(newValue);
-      },
-      items: assignments.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-    );
-  }
-}

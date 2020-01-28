@@ -27,9 +27,11 @@ class SheetSelectorScreen extends StatelessWidget {
 class _SheetSelectorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<SheetSelectorModel>(
-      builder: (context, sheetSelectorModel, child) {
-        final sheetList = sheetSelectorModel.sheetList;
+    return Selector<SheetSelectorModel, List<File>>(
+      selector: (_, sheetSelectorModel) => sheetSelectorModel.fileList,
+      builder: (_, fileList, child) {
+        print("building sheet selector");
+        final sheetList = fileList;
         return ListView.builder(
             scrollDirection: Axis.vertical,
             shrinkWrap: true,

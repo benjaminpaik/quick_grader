@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v2.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/sheets/v4.dart';
-
-import 'my_client.dart';
+import '../misc/authorization.dart';
+import '../misc/my_client.dart';
 
 final _sheetsRoute = '/sheets';
 final _gradesRoute = '/grades';
@@ -13,41 +13,6 @@ final _gradesRoute = '/grades';
 final _sheetRange = 'Sheet1';
 final _baseRow = 2;
 final _baseColumn = 1;
-
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: <String>[
-    'email',
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive'
-  ],
-);
-
-class AuthManager {
-  static Future<GoogleSignInAccount> signIn() async {
-    try {
-      final account = await _googleSignIn.signIn();
-      print('account: ${account?.toString()}');
-      return account;
-    } catch (error) {
-      print(error);
-      return null;
-    }
-  }
-
-  static Future<GoogleSignInAccount> signInSilently() async {
-    var account = await _googleSignIn.signInSilently();
-    print('account: $account');
-    return account;
-  }
-
-  static Future<void> signOut() async {
-    try {
-      _googleSignIn.disconnect();
-    } catch (error) {
-      print(error);
-    }
-  }
-}
 
 class SheetSelectorModel extends ChangeNotifier {
   GoogleSignInAccount _currentUser;
@@ -65,7 +30,7 @@ class SheetSelectorModel extends ChangeNotifier {
         _assignmentList = null,
         _assignmentSelectionIndex = -1;
 
-  UnmodifiableListView<File> get sheetList => UnmodifiableListView(_files);
+  UnmodifiableListView<File> get fileList => UnmodifiableListView(_files);
   ValueRange get spreadSheet => _spreadSheet;
   List<String> get assignmentList => _assignmentList;
   String get selectedAssignment {
@@ -75,12 +40,12 @@ class SheetSelectorModel extends ChangeNotifier {
       return null;
     }
   }
+
   List<int> get gradesList => _gradesList;
 
   void setSelectedAssignment(String selection) async {
     _assignmentSelectionIndex = _assignmentList.indexOf(selection);
     if (_assignmentSelectionIndex >= 0) {
-
       _spreadSheet =
           await _sheetsApi.spreadsheets.values.get(_fileId, _sheetRange);
       _assignmentList = _spreadSheet.values.first
@@ -89,10 +54,13 @@ class SheetSelectorModel extends ChangeNotifier {
           .toList();
 
       int rowIndex = _assignmentSelectionIndex + 1;
-      _gradesList = _spreadSheet.values
-          .sublist(1)
-          .map((row) => int.parse(row[rowIndex].toString().trim()))
-          .toList();
+      _gradesList = _spreadSheet.values.sublist(1).map((row) {
+        try {
+          return int.parse(row[rowIndex].toString().trim());
+        } catch (e) {
+          return 0;
+        }
+      }).toList();
     }
     notifyListeners();
   }
@@ -177,14 +145,20 @@ class SheetSelectorModel extends ChangeNotifier {
   }
 
   void updateGrade(int studentIndex, int value) async {
-    if(_assignmentSelectionIndex >= 0) {
+    if (_assignmentSelectionIndex >= 0) {
       _gradesList[studentIndex] = value;
       notifyListeners();
     }
   }
+
+  int getGrade(int studentIndex) {
+    var assignmentGrade = 0;
+    if (studentIndex < _gradesList.length) {
+      assignmentGrade = _gradesList[studentIndex];
+    }
+    return assignmentGrade;
+  }
 }
-
-
 
 String _getRange(int assignmentIndex, int studentIndex) {
   String rangeString;
