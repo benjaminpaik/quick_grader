@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:googleapis/drive/v2.dart';
+import 'package:googleapis/drive/v3.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_grader/models/grades_model.dart';
 import 'package:kt_dart/kt.dart';
@@ -30,7 +30,6 @@ class _SheetSelectorWidget extends StatelessWidget {
     return Selector<SheetSelectorModel, List<File>>(
       selector: (_, sheetSelectorModel) => sheetSelectorModel.fileList,
       builder: (_, fileList, child) {
-        print("building sheet selector");
         final sheetList = fileList;
         return ListView.builder(
             scrollDirection: Axis.vertical,
@@ -71,7 +70,7 @@ class FileWidget extends StatelessWidget {
         radius: 8.0,
         onTap: () {
             final sheetSelectorModel = Provider.of<SheetSelectorModel>(context, listen: false);
-            sheetSelectorModel.loadSpreadsheet(context, file.id);
+            sheetSelectorModel.updateDirectory(context, file);
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -79,7 +78,7 @@ class FileWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                file.title,
+                file.name,
                 style: TextStyle(
                   fontSize: 15.0,
                   fontWeight: FontWeight.bold,
@@ -91,7 +90,7 @@ class FileWidget extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      formatter.format(file.createdDate),
+                      formatter.format(file.createdTime),
                       style: TextStyle(
                         fontSize: 12.0,
                       ),
@@ -99,7 +98,7 @@ class FileWidget extends StatelessWidget {
                   ),
                   SizedBox(width: 8.0),
                   Text(
-                    KtList.from(file.ownerNames).joinToString(),
+                    KtList.from(file.owners.map((element) => element.displayName)).joinToString(),
                     style: TextStyle(
                       fontSize: 12.0,
                     ),
