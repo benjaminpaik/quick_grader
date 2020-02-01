@@ -136,7 +136,7 @@ class _TabSelector extends StatelessWidget {
             onChanged: (String newValue) {
               sheetSelectorModel.setSelectedTab(newValue);
             },
-            items: sheetSelectorModel.sheetNames
+            items: sheetSelectorModel.tabNames
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,

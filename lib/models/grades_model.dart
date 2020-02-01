@@ -14,39 +14,38 @@ final _baseRow = 2;
 final _baseColumn = 1;
 
 class SheetSelectorModel extends ChangeNotifier {
+  SheetsApi _sheetsApi;
   GoogleSignInAccount _currentUser;
   List<File> _files = [];
   List<String> _filePath;
   String _fileId;
   ValueRange _spreadSheet;
-  List<String> _sheetNames;
-  int _selectedSheetIndex;
+  List<String> _tabNames;
+  int _selectedTabIndex;
   List<String> _assignmentList;
-  List<int> _gradesList;
   int _assignmentIndex;
-  SheetsApi _sheetsApi;
+  List<int> _gradesList;
 
   SheetSelectorModel()
       : _currentUser = null,
         _filePath = [],
         _spreadSheet = null,
-        _sheetNames = [],
+        _tabNames = [],
         _assignmentList = [],
         _gradesList = [],
         _assignmentIndex = 0,
-        _selectedSheetIndex = 0;
+        _selectedTabIndex = 0;
 
   UnmodifiableListView<File> get fileList => UnmodifiableListView(_files);
   ValueRange get spreadSheet => _spreadSheet;
-  List<String> get sheetNames => _sheetNames;
+  List<String> get tabNames => _tabNames;
   List<String> get assignmentList => _assignmentList;
   String get selectedSheet {
-    if (_selectedSheetIndex >= 0)
-      return _sheetNames[_selectedSheetIndex];
+    if (_selectedTabIndex >= 0)
+      return _tabNames[_selectedTabIndex];
     else
       return null;
   }
-
   String get selectedAssignment {
     if (_assignmentIndex >= 0)
       return _assignmentList[_assignmentIndex];
@@ -55,10 +54,10 @@ class SheetSelectorModel extends ChangeNotifier {
   }
 
   void setSelectedTab(String selection) async {
-    _selectedSheetIndex = _sheetNames.indexOf(selection);
-    if (_selectedSheetIndex >= 0) {
+    _selectedTabIndex = _tabNames.indexOf(selection);
+    if (_selectedTabIndex >= 0) {
       _spreadSheet =
-      await _sheetsApi.spreadsheets.values.get(_fileId, _sheetNames[_selectedSheetIndex]);
+      await _sheetsApi.spreadsheets.values.get(_fileId, _tabNames[_selectedTabIndex]);
       _assignmentList = _spreadSheet.values.first
           .sublist(1)
           .map((val) => val.toString())
@@ -72,7 +71,7 @@ class SheetSelectorModel extends ChangeNotifier {
     _assignmentIndex = _assignmentList.indexOf(selection);
     if (_assignmentIndex >= 0) {
       _spreadSheet = await _sheetsApi.spreadsheets.values
-          .get(_fileId, _sheetNames[_selectedSheetIndex]);
+          .get(_fileId, _tabNames[_selectedTabIndex]);
       _assignmentList = _spreadSheet.values.first
           .sublist(1)
           .map((val) => val.toString())
@@ -116,7 +115,6 @@ class SheetSelectorModel extends ChangeNotifier {
 
     GoogleSignInAuthentication authentication =
         await _currentUser.authentication;
-    print('authentication: $authentication');
     final client = MyClient(defaultHeaders: {
       'Authorization': 'Bearer ${authentication.accessToken}'
     });
@@ -130,6 +128,36 @@ class SheetSelectorModel extends ChangeNotifier {
     );
     _files = response.files;
     notifyListeners();
+  }
+
+  Future<void> _loadSpreadsheet(BuildContext context, String fileId) async {
+    if (_currentUser == null) return;
+
+    GoogleSignInAuthentication authentication =
+    await _currentUser.authentication;
+    print('authentication: $authentication');
+    final client = MyClient(defaultHeaders: {
+      'Authorization': 'Bearer ${authentication.accessToken}'
+    });
+
+    _fileId = fileId;
+    _sheetsApi = SheetsApi(client);
+
+    final sheetInfo = await _sheetsApi.spreadsheets.get(_fileId);
+    _tabNames =
+        sheetInfo.sheets.map((sheet) => sheet.properties.title).toList();
+
+    if (_tabNames.length > 0) {
+      _spreadSheet =
+      await _sheetsApi.spreadsheets.values.get(_fileId, _tabNames.first);
+      _assignmentList = _spreadSheet.values.first
+          .sublist(1)
+          .map((val) => val.toString())
+          .toList();
+      setSelectedAssignment(_assignmentList.first);
+      Navigator.pushNamed(context, gradesRoute);
+      notifyListeners();
+    }
   }
 
   Future<void> updateDirectory(BuildContext context, File file) async {
@@ -148,36 +176,6 @@ class SheetSelectorModel extends ChangeNotifier {
     _loadFiles(_filePath.last, false);
   }
 
-  Future<void> _loadSpreadsheet(BuildContext context, String fileId) async {
-    if (_currentUser == null) return;
-
-    GoogleSignInAuthentication authentication =
-        await _currentUser.authentication;
-    print('authentication: $authentication');
-    final client = MyClient(defaultHeaders: {
-      'Authorization': 'Bearer ${authentication.accessToken}'
-    });
-
-    _fileId = fileId;
-    _sheetsApi = SheetsApi(client);
-
-    final sheetInfo = await _sheetsApi.spreadsheets.get(_fileId);
-    _sheetNames =
-        sheetInfo.sheets.map((sheet) => sheet.properties.title).toList();
-
-    if (_sheetNames.length > 0) {
-      _spreadSheet =
-          await _sheetsApi.spreadsheets.values.get(_fileId, _sheetNames.first);
-      _assignmentList = _spreadSheet.values.first
-          .sublist(1)
-          .map((val) => val.toString())
-          .toList();
-      setSelectedAssignment(_assignmentList.first);
-      Navigator.pushNamed(context, gradesRoute);
-      notifyListeners();
-    }
-  }
-
   Future<void> assignGrade(int studentIndex, int value) async {
     if (_currentUser == null || _assignmentIndex < 0) return;
 
@@ -191,7 +189,7 @@ class SheetSelectorModel extends ChangeNotifier {
       ]
     });
 
-    String writeRange = _getRange(_sheetNames[_selectedSheetIndex], _assignmentIndex, studentIndex);
+    String writeRange = _getRange(_tabNames[_selectedTabIndex], _assignmentIndex, studentIndex);
     if (writeRange != null) {
       _sheetsApi.spreadsheets.values
           .update(vr, _fileId, writeRange, valueInputOption: "USER_ENTERED");
@@ -222,7 +220,7 @@ String _getRange(String tabName, int assignmentIndex, int studentIndex) {
   if (assignmentIndex >= 0 && studentIndex >= 0) {
     String columnLetter = _getColumnLetter(_baseColumn + assignmentIndex);
     int rowNumber = _baseRow + studentIndex;
-    rangeString = tabName + "!" + columnLetter + rowNumber.toString();
+    rangeString = "$tabName!$columnLetter${rowNumber.toString()}";
   }
   return rangeString;
 }
