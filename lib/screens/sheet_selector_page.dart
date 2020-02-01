@@ -14,8 +14,15 @@ class SheetSelectorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
-      ),
+          title: Text(title),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              final sheetSelectorModel =
+                  Provider.of<SheetSelectorModel>(context, listen: false);
+              sheetSelectorModel.exitDirectory();
+            },
+          )),
       body: Align(
         alignment: Alignment.topCenter,
         child: _SheetSelectorWidget(),
@@ -59,18 +66,22 @@ class FileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fileColor = isSpreadsheet(file)
+        ? Colors.green.withOpacity(0.8)
+        : Colors.white.withOpacity(0.8);
     return Card(
       elevation: 0.0,
       shape: RoundedRectangleBorder(
         side: BorderSide(width: 1.0, color: Colors.blue.withOpacity(0.2)),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      color: Colors.white.withOpacity(0.8),
+      color: fileColor,
       child: RippleWidget(
         radius: 8.0,
         onTap: () {
-            final sheetSelectorModel = Provider.of<SheetSelectorModel>(context, listen: false);
-            sheetSelectorModel.updateDirectory(context, file);
+          final sheetSelectorModel =
+              Provider.of<SheetSelectorModel>(context, listen: false);
+          sheetSelectorModel.updateDirectory(context, file);
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -98,7 +109,9 @@ class FileWidget extends StatelessWidget {
                   ),
                   SizedBox(width: 8.0),
                   Text(
-                    KtList.from(file.owners.map((element) => element.displayName)).joinToString(),
+                    KtList.from(
+                            file.owners.map((element) => element.displayName))
+                        .joinToString(),
                     style: TextStyle(
                       fontSize: 12.0,
                     ),

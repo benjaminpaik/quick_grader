@@ -16,6 +16,7 @@ final _baseColumn = 1;
 class SheetSelectorModel extends ChangeNotifier {
   GoogleSignInAccount _currentUser;
   List<File> _files = [];
+  List<String> _filePath;
   String _fileId;
   ValueRange _spreadSheet;
   List<String> _sheetNames;
@@ -27,6 +28,7 @@ class SheetSelectorModel extends ChangeNotifier {
 
   SheetSelectorModel()
       : _currentUser = null,
+        _filePath = [],
         _spreadSheet = null,
         _assignmentList = [],
         _gradesList = [],
@@ -49,8 +51,8 @@ class SheetSelectorModel extends ChangeNotifier {
   void setSelectedAssignment(String selection) async {
     _assignmentIndex = _assignmentList.indexOf(selection);
     if (_assignmentIndex >= 0) {
-      _spreadSheet =
-          await _sheetsApi.spreadsheets.values.get(_fileId, _sheetNames[_selectedSheet]);
+      _spreadSheet = await _sheetsApi.spreadsheets.values
+          .get(_fileId, _sheetNames[_selectedSheet]);
       _assignmentList = _spreadSheet.values.first
           .sublist(1)
           .map((val) => val.toString())
@@ -72,7 +74,7 @@ class SheetSelectorModel extends ChangeNotifier {
     var account = await AuthManager.signInSilently();
     _currentUser = account;
     if (account != null) {
-      _loadFiles('root');
+      _loadFiles('root', true);
       Navigator.pushReplacementNamed(context, _sheetsRoute);
     }
   }
@@ -81,13 +83,16 @@ class SheetSelectorModel extends ChangeNotifier {
     var account = await AuthManager.signIn();
     _currentUser = account;
     if (account != null) {
-      _loadFiles('root');
+      _loadFiles('root', true);
       Navigator.pushReplacementNamed(context, _sheetsRoute);
     }
   }
 
-  Future<void> _loadFiles(String directory) async {
+  Future<void> _loadFiles(String directory, bool addtoPath) async {
     if (_currentUser == null) return;
+    if(addtoPath) {
+      _filePath.add(directory);
+    }
 
     GoogleSignInAuthentication authentication =
         await _currentUser.authentication;
@@ -112,8 +117,15 @@ class SheetSelectorModel extends ChangeNotifier {
     if (mimeType.contains("spreadsheet")) {
       _loadSpreadsheet(context, file.id);
     } else if (mimeType.contains("folder")) {
-      _loadFiles(file.id);
+      _loadFiles(file.id, true);
     }
+  }
+
+  Future<void> exitDirectory() async {
+    if(_filePath.length > 1) {
+      _filePath.removeLast();
+    }
+    _loadFiles(_filePath.last, false);
   }
 
   Future<void> _loadSpreadsheet(BuildContext context, String fileId) async {
@@ -202,4 +214,12 @@ String _getColumnLetter(int value) {
   else if (charCode > 90) charCode = 90;
   String temp = String.fromCharCode(charCode);
   return temp;
+}
+
+bool isSpreadsheet(File file) {
+  return file.mimeType.toString().contains('spreadsheet');
+}
+
+bool isFolder(File file) {
+  return file.mimeType.toString().contains('folder');
 }
