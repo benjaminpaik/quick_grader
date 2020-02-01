@@ -12,7 +12,13 @@ class StudentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: _TabSelector(),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushNamed(context, sheetsRoute);
+          },
+        ),
         actions: <Widget>[
           _AssignmentSelector(),
         ],
@@ -72,9 +78,7 @@ class _StudentWidget extends StatelessWidget {
         ),
       ),
       SizedBox(height: _buttonHeight, child: _GradeSliderWidget(studentIndex)),
-      Divider(
-        height: 20.0,
-      ),
+      Divider(height: 20.0,),
     ]);
   }
 }
@@ -107,6 +111,40 @@ class _GradeSliderWidget extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+class _TabSelector extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final sheetSelectorModel =
+    Provider.of<SheetSelectorModel>(context, listen: false);
+    return Selector<SheetSelectorModel, String>(
+        selector: (_, sheetSelectorModel) =>
+        sheetSelectorModel.selectedSheet,
+        builder: (context, selectedSheet, child) {
+          return DropdownButton<String>(
+            value: selectedSheet,
+            icon: Icon(Icons.arrow_downward),
+            iconSize: 24,
+            elevation: 16,
+            style: TextStyle(color: Colors.grey),
+            underline: Container(
+              height: 2,
+              color: Colors.black,
+            ),
+            onChanged: (String newValue) {
+              sheetSelectorModel.setSelectedTab(newValue);
+            },
+            items: sheetSelectorModel.sheetNames
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          );
+        });
   }
 }
 

@@ -7,8 +7,8 @@ import 'package:googleapis/sheets/v4.dart';
 import '../misc/authorization.dart';
 import '../misc/my_client.dart';
 
-final _sheetsRoute = '/sheets';
-final _gradesRoute = '/grades';
+final sheetsRoute = '/sheets';
+final gradesRoute = '/grades';
 
 final _baseRow = 2;
 final _baseColumn = 1;
@@ -20,7 +20,7 @@ class SheetSelectorModel extends ChangeNotifier {
   String _fileId;
   ValueRange _spreadSheet;
   List<String> _sheetNames;
-  int _selectedSheet;
+  int _selectedSheetIndex;
   List<String> _assignmentList;
   List<int> _gradesList;
   int _assignmentIndex;
@@ -30,29 +30,49 @@ class SheetSelectorModel extends ChangeNotifier {
       : _currentUser = null,
         _filePath = [],
         _spreadSheet = null,
+        _sheetNames = [],
         _assignmentList = [],
         _gradesList = [],
-        _assignmentIndex = -1,
-        _selectedSheet = 0;
+        _assignmentIndex = 0,
+        _selectedSheetIndex = 0;
 
   UnmodifiableListView<File> get fileList => UnmodifiableListView(_files);
   ValueRange get spreadSheet => _spreadSheet;
+  List<String> get sheetNames => _sheetNames;
   List<String> get assignmentList => _assignmentList;
-  String get selectedAssignment {
-    if (_assignmentIndex >= 0) {
-      return _assignmentList[_assignmentIndex];
-    } else {
+  String get selectedSheet {
+    if (_selectedSheetIndex >= 0)
+      return _sheetNames[_selectedSheetIndex];
+    else
       return null;
-    }
   }
 
-  List<int> get gradesList => _gradesList;
+  String get selectedAssignment {
+    if (_assignmentIndex >= 0)
+      return _assignmentList[_assignmentIndex];
+    else
+      return null;
+  }
+
+  void setSelectedTab(String selection) async {
+    _selectedSheetIndex = _sheetNames.indexOf(selection);
+    if (_selectedSheetIndex >= 0) {
+      _spreadSheet =
+      await _sheetsApi.spreadsheets.values.get(_fileId, _sheetNames[_selectedSheetIndex]);
+      _assignmentList = _spreadSheet.values.first
+          .sublist(1)
+          .map((val) => val.toString())
+          .toList();
+      setSelectedAssignment(_assignmentList.first);
+      notifyListeners();
+    }
+  }
 
   void setSelectedAssignment(String selection) async {
     _assignmentIndex = _assignmentList.indexOf(selection);
     if (_assignmentIndex >= 0) {
       _spreadSheet = await _sheetsApi.spreadsheets.values
-          .get(_fileId, _sheetNames[_selectedSheet]);
+          .get(_fileId, _sheetNames[_selectedSheetIndex]);
       _assignmentList = _spreadSheet.values.first
           .sublist(1)
           .map((val) => val.toString())
@@ -75,7 +95,7 @@ class SheetSelectorModel extends ChangeNotifier {
     _currentUser = account;
     if (account != null) {
       _loadFiles('root', true);
-      Navigator.pushReplacementNamed(context, _sheetsRoute);
+      Navigator.pushReplacementNamed(context, sheetsRoute);
     }
   }
 
@@ -84,13 +104,13 @@ class SheetSelectorModel extends ChangeNotifier {
     _currentUser = account;
     if (account != null) {
       _loadFiles('root', true);
-      Navigator.pushReplacementNamed(context, _sheetsRoute);
+      Navigator.pushReplacementNamed(context, sheetsRoute);
     }
   }
 
-  Future<void> _loadFiles(String directory, bool addtoPath) async {
+  Future<void> _loadFiles(String directory, bool addToPath) async {
     if (_currentUser == null) return;
-    if(addtoPath) {
+    if (addToPath) {
       _filePath.add(directory);
     }
 
@@ -121,8 +141,8 @@ class SheetSelectorModel extends ChangeNotifier {
     }
   }
 
-  Future<void> exitDirectory() async {
-    if(_filePath.length > 1) {
+  Future<void> exitDirectory(BuildContext context) async {
+    if (_filePath.length > 1) {
       _filePath.removeLast();
     }
     _loadFiles(_filePath.last, false);
@@ -153,7 +173,7 @@ class SheetSelectorModel extends ChangeNotifier {
           .map((val) => val.toString())
           .toList();
       setSelectedAssignment(_assignmentList.first);
-      Navigator.pushNamed(context, _gradesRoute);
+      Navigator.pushNamed(context, gradesRoute);
       notifyListeners();
     }
   }
@@ -171,7 +191,7 @@ class SheetSelectorModel extends ChangeNotifier {
       ]
     });
 
-    String writeRange = _getRange(_assignmentIndex, studentIndex);
+    String writeRange = _getRange(_sheetNames[_selectedSheetIndex], _assignmentIndex, studentIndex);
     if (writeRange != null) {
       _sheetsApi.spreadsheets.values
           .update(vr, _fileId, writeRange, valueInputOption: "USER_ENTERED");
@@ -196,13 +216,13 @@ class SheetSelectorModel extends ChangeNotifier {
   }
 }
 
-String _getRange(int assignmentIndex, int studentIndex) {
+String _getRange(String tabName, int assignmentIndex, int studentIndex) {
   String rangeString;
   // make sure both indices are valid
   if (assignmentIndex >= 0 && studentIndex >= 0) {
     String columnLetter = _getColumnLetter(_baseColumn + assignmentIndex);
     int rowNumber = _baseRow + studentIndex;
-    rangeString = columnLetter + rowNumber.toString();
+    rangeString = tabName + "!" + columnLetter + rowNumber.toString();
   }
   return rangeString;
 }

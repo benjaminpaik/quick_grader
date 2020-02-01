@@ -20,7 +20,7 @@ class SheetSelectorScreen extends StatelessWidget {
             onPressed: () {
               final sheetSelectorModel =
                   Provider.of<SheetSelectorModel>(context, listen: false);
-              sheetSelectorModel.exitDirectory();
+              sheetSelectorModel.exitDirectory(context);
             },
           )),
       body: Align(
