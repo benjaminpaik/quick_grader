@@ -46,6 +46,7 @@ class SheetSelectorModel extends ChangeNotifier {
     else
       return null;
   }
+
   String get selectedAssignment {
     if (_assignmentIndex >= 0)
       return _assignmentList[_assignmentIndex];
@@ -56,8 +57,8 @@ class SheetSelectorModel extends ChangeNotifier {
   void setSelectedTab(String selection) async {
     _selectedTabIndex = _tabNames.indexOf(selection);
     if (_selectedTabIndex >= 0) {
-      _spreadSheet =
-      await _sheetsApi.spreadsheets.values.get(_fileId, _tabNames[_selectedTabIndex]);
+      _spreadSheet = await _sheetsApi.spreadsheets.values
+          .get(_fileId, _tabNames[_selectedTabIndex]);
       _assignmentList = _spreadSheet.values.first
           .sublist(1)
           .map((val) => val.toString())
@@ -134,7 +135,7 @@ class SheetSelectorModel extends ChangeNotifier {
     if (_currentUser == null) return;
 
     GoogleSignInAuthentication authentication =
-    await _currentUser.authentication;
+        await _currentUser.authentication;
     print('authentication: $authentication');
     final client = MyClient(defaultHeaders: {
       'Authorization': 'Bearer ${authentication.accessToken}'
@@ -149,7 +150,7 @@ class SheetSelectorModel extends ChangeNotifier {
 
     if (_tabNames.length > 0) {
       _spreadSheet =
-      await _sheetsApi.spreadsheets.values.get(_fileId, _tabNames.first);
+          await _sheetsApi.spreadsheets.values.get(_fileId, _tabNames.first);
       _assignmentList = _spreadSheet.values.first
           .sublist(1)
           .map((val) => val.toString())
@@ -189,7 +190,8 @@ class SheetSelectorModel extends ChangeNotifier {
       ]
     });
 
-    String writeRange = _getRange(_tabNames[_selectedTabIndex], _assignmentIndex, studentIndex);
+    String writeRange =
+        _getRange(_tabNames[_selectedTabIndex], _assignmentIndex, studentIndex);
     if (writeRange != null) {
       _sheetsApi.spreadsheets.values
           .update(vr, _fileId, writeRange, valueInputOption: "USER_ENTERED");
@@ -225,13 +227,17 @@ String _getRange(String tabName, int assignmentIndex, int studentIndex) {
   return rangeString;
 }
 
-String _getColumnLetter(int value) {
-  int charCode = value + 65;
-  if (charCode < 65)
-    charCode = 65;
-  else if (charCode > 90) charCode = 90;
-  String temp = String.fromCharCode(charCode);
-  return temp;
+String _getColumnLetter(int columnNumber) {
+  int dividend = columnNumber + 1;
+  String columnName = "";
+  int modulo;
+
+  while (dividend > 0) {
+    modulo = (dividend - 1) % 26;
+    columnName = String.fromCharCode(65 + modulo) + columnName;
+    dividend = ((dividend - modulo) ~/ 26);
+  }
+  return columnName;
 }
 
 bool isSpreadsheet(File file) {
