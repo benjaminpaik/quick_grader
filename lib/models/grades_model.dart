@@ -7,6 +7,7 @@ import 'package:googleapis/sheets/v4.dart';
 import '../misc/authorization.dart';
 import '../misc/my_client.dart';
 
+final loginRoute = '/';
 final sheetsRoute = '/sheets';
 final gradesRoute = '/grades';
 
@@ -106,6 +107,12 @@ class SheetSelectorModel extends ChangeNotifier {
       _loadFiles('root', true);
       Navigator.pushReplacementNamed(context, sheetsRoute);
     }
+  }
+
+  Future<void> handleSignOut(BuildContext context) async {
+    _filePath.clear();
+    AuthManager.signOut();
+    Navigator.pushReplacementNamed(context, loginRoute);
   }
 
   Future<void> _loadFiles(String directory, bool addToPath) async {

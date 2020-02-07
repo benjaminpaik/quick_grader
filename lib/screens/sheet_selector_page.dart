@@ -22,7 +22,20 @@ class SheetSelectorScreen extends StatelessWidget {
                   Provider.of<SheetSelectorModel>(context, listen: false);
               sheetSelectorModel.exitDirectory(context);
             },
-          )),
+          ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text(
+            'LOGOUT',
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: () {
+            final sheetSelectorModel =
+            Provider.of<SheetSelectorModel>(context, listen: false);
+            sheetSelectorModel.handleSignOut(context);
+          },
+        )
+      ],),
       body: Align(
         alignment: Alignment.topCenter,
         child: _SheetSelectorWidget(),
