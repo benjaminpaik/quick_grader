@@ -91,19 +91,14 @@ class SheetSelectorModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> signInSilently(BuildContext context) async {
-    var account = await AuthManager.signInSilently();
-    _currentUser = account;
-    if (account != null) {
-      _loadFiles('root', true);
-      Navigator.pushReplacementNamed(context, sheetsRoute);
-    }
-  }
-
   Future<void> handleSignIn(BuildContext context) async {
-    var account = await AuthManager.signIn();
-    _currentUser = account;
-    if (account != null) {
+    if(_currentUser == null) {
+      _currentUser = await AuthManager.signInSilently();
+    }
+    else {
+      _currentUser = await AuthManager.signIn();
+    }
+    if (_currentUser != null) {
       _loadFiles('root', true);
       Navigator.pushReplacementNamed(context, sheetsRoute);
     }

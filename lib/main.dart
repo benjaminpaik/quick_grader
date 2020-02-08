@@ -13,7 +13,8 @@ class QuickGrade extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<SheetSelectorModel>(create: (context) => SheetSelectorModel()),
+        ChangeNotifierProvider<SheetSelectorModel>(
+            create: (context) => SheetSelectorModel()),
       ],
       child: MaterialApp(
         title: 'Quick Grader',
@@ -23,8 +24,8 @@ class QuickGrade extends StatelessWidget {
         initialRoute: '/',
         routes: {
           '/': (context) => LoginScreen(title: 'LOGIN'),
-          '/sheets': (context) => SheetSelectorScreen(title: 'SHEETS',),
-          '/grades': (context) => StudentsScreen(title: 'STUDENTS',),
+          '/sheets': (context) => SheetSelectorScreen(title: 'SHEETS'),
+          '/grades': (context) => StudentsScreen(title: 'STUDENTS'),
         },
       ),
     );

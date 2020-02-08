@@ -23,13 +23,17 @@ class AuthManager {
 
   static Future<GoogleSignInAccount> signInSilently() async {
     var account = await _googleSignIn.signInSilently();
-    print('account: $account');
+    print("silent sign in");
+    if(account == null) {
+      print("silent sign in failed");
+      account = await signIn();
+    }
     return account;
   }
 
   static Future<void> signOut() async {
     try {
-      _googleSignIn.disconnect();
+      _googleSignIn.signOut();
     } catch (error) {
       print(error);
     }
