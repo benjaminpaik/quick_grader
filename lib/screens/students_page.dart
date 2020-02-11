@@ -89,13 +89,12 @@ class _GradeSliderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sheetSelectorModel =
-        Provider.of<SheetSelectorModel>(context, listen: false);
-
     return Selector<SheetSelectorModel, int>(
       selector: (_, sheetSelectorModel) =>
           sheetSelectorModel.getGrade(studentIndex),
       builder: (context, grade, child) {
+        final sheetSelectorModel =
+        Provider.of<SheetSelectorModel>(context, listen: false);
         return Slider(
           onChanged: (value) {
             sheetSelectorModel.updateGrade(studentIndex, value.round());
@@ -104,8 +103,8 @@ class _GradeSliderWidget extends StatelessWidget {
             sheetSelectorModel.assignGrade(studentIndex, value.round());
           },
           min: 0.0,
-          max: 100.0,
-          divisions: 100,
+          max: sheetSelectorModel.maxPoints.toDouble(),
+          divisions: sheetSelectorModel.maxPoints,
           value: grade.toDouble(),
           label: grade.toString(),
         );
@@ -174,39 +173,19 @@ class _AssignmentSelector extends StatelessWidget {
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
-                child: Text(value),
+                child: Text(_formatAssignmentText(value)),
               );
             }).toList(),
           );
         });
   }
-}
-
-/*
-class _StudentRowWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<SheetSelectorModel>(
-      builder: (context, sheetSelectorModel, child) {
-        final sheetList = sheetSelectorModel.sheetList;
-        return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            padding: EdgeInsets.all(0.0),
-            itemCount: sheetList.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (index < sheetList.length) {
-                return GestureDetector(
-                  key: ObjectKey(index),
-                  child: FileWidget(
-                      sheetList[index]),
-                );
-              } else {
-                return null;
-              }
-            });
-      },
-    );
+  String _formatAssignmentText(String assignment) {
+    int assignmentPoints = getAssignmentPoints(assignment);
+    String pointsText = '($assignmentPoints)';
+    if(assignmentPoints > 0) {
+      return assignment.replaceFirst(pointsText, '');
+    }
+    return assignment;
   }
 }
- */
+

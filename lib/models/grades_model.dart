@@ -11,6 +11,7 @@ final loginRoute = '/';
 final sheetsRoute = '/sheets';
 final gradesRoute = '/grades';
 
+final _defaultMaxPoints = 100;
 final _baseRow = 2;
 final _baseColumn = 1;
 
@@ -25,6 +26,7 @@ class SheetSelectorModel extends ChangeNotifier {
   int _selectedTabIndex;
   List<String> _assignmentList;
   int _assignmentIndex;
+  int _maxPoints;
   List<int> _gradesList;
 
   SheetSelectorModel()
@@ -35,12 +37,14 @@ class SheetSelectorModel extends ChangeNotifier {
         _assignmentList = [],
         _gradesList = [],
         _assignmentIndex = 0,
+        _maxPoints = _defaultMaxPoints,
         _selectedTabIndex = 0;
 
   UnmodifiableListView<File> get fileList => UnmodifiableListView(_files);
   ValueRange get spreadSheet => _spreadSheet;
   List<String> get tabNames => _tabNames;
   List<String> get assignmentList => _assignmentList;
+  int get maxPoints => _maxPoints;
   String get selectedSheet {
     if (_selectedTabIndex >= 0)
       return _tabNames[_selectedTabIndex];
@@ -78,7 +82,8 @@ class SheetSelectorModel extends ChangeNotifier {
           .sublist(1)
           .map((val) => val.toString())
           .toList();
-
+      _maxPoints = getAssignmentPoints(selection);
+      if(_maxPoints == 0) _maxPoints = _defaultMaxPoints;
       int rowIndex = _assignmentIndex + 1;
       _gradesList = _spreadSheet.values.sublist(1).map((row) {
         try {
@@ -92,10 +97,9 @@ class SheetSelectorModel extends ChangeNotifier {
   }
 
   Future<void> handleSignIn(BuildContext context) async {
-    if(_currentUser == null) {
+    if (_currentUser == null) {
       _currentUser = await AuthManager.signInSilently();
-    }
-    else {
+    } else {
       _currentUser = await AuthManager.signIn();
     }
     if (_currentUser != null) {
@@ -212,7 +216,9 @@ class SheetSelectorModel extends ChangeNotifier {
   int getGrade(int studentIndex) {
     var assignmentGrade = 0;
     if (studentIndex < _gradesList.length) {
-      assignmentGrade = _gradesList[studentIndex];
+      assignmentGrade = (_gradesList[studentIndex] > _maxPoints)
+          ? _maxPoints
+          : _gradesList[studentIndex];
     }
     return assignmentGrade;
   }
@@ -240,6 +246,18 @@ String _getColumnLetter(int columnNumber) {
     dividend = ((dividend - modulo) ~/ 26);
   }
   return columnName;
+}
+
+int getAssignmentPoints(String assignment) {
+  int assignmentPoints = 0;
+  int startIndex = assignment.indexOf("(");
+  int endIndex = assignment.indexOf(")");
+  // string contains parenthesis
+  if (startIndex >= 0 && endIndex > startIndex) {
+    String pointsString = assignment.substring(startIndex + 1, endIndex);
+    assignmentPoints = int.tryParse(pointsString) ?? 0;
+  }
+  return assignmentPoints;
 }
 
 bool isSpreadsheet(File file) {
