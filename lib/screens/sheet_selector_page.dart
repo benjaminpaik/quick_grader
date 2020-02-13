@@ -14,28 +14,29 @@ class SheetSelectorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(title),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              final sheetSelectorModel =
-                  Provider.of<SheetSelectorModel>(context, listen: false);
-              sheetSelectorModel.exitDirectory(context);
-            },
-          ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text(
-            'LOGOUT',
-            style: TextStyle(color: Colors.white),
-          ),
+        title: Text(title),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             final sheetSelectorModel =
-            Provider.of<SheetSelectorModel>(context, listen: false);
-            sheetSelectorModel.handleSignOut(context);
+                Provider.of<GradesModel>(context, listen: false);
+            sheetSelectorModel.exitDirectory(context);
           },
-        )
-      ],),
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text(
+              'LOGOUT',
+              style: TextStyle(color: Colors.white),
+            ),
+            onPressed: () {
+              final sheetSelectorModel =
+                  Provider.of<GradesModel>(context, listen: false);
+              sheetSelectorModel.handleSignOut(context);
+            },
+          )
+        ],
+      ),
       body: Align(
         alignment: Alignment.topCenter,
         child: _SheetSelectorWidget(),
@@ -47,7 +48,7 @@ class SheetSelectorScreen extends StatelessWidget {
 class _SheetSelectorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Selector<SheetSelectorModel, List<File>>(
+    return Selector<GradesModel, List<File>>(
       selector: (_, sheetSelectorModel) => sheetSelectorModel.fileList,
       builder: (_, fileList, child) {
         final sheetList = fileList;
@@ -84,17 +85,15 @@ class FileWidget extends StatelessWidget {
         : Colors.white.withOpacity(0.8);
     return Card(
       elevation: 0.0,
+      margin: EdgeInsets.all(2.0),
       shape: RoundedRectangleBorder(
-        side: BorderSide(width: 1.0, color: Colors.blue.withOpacity(0.2)),
-        borderRadius: BorderRadius.circular(8.0),
+        side: BorderSide(width: 1.0, color: Colors.black.withOpacity(0.4)),
       ),
       color: fileColor,
       child: RippleWidget(
-        radius: 8.0,
         onTap: () {
-          final sheetSelectorModel =
-              Provider.of<SheetSelectorModel>(context, listen: false);
-          sheetSelectorModel.updateDirectory(context, file);
+          final gradesModel = Provider.of<GradesModel>(context, listen: false);
+          gradesModel.updateDirectory(context, file);
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -104,19 +103,19 @@ class FileWidget extends StatelessWidget {
               Text(
                 file.name,
                 style: TextStyle(
-                  fontSize: 15.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withOpacity(1.0),
                 ),
               ),
-              SizedBox(height: 4.0),
+              SizedBox(height: 10.0),
               Row(
                 children: <Widget>[
                   Expanded(
                     child: Text(
                       formatter.format(file.createdTime),
                       style: TextStyle(
-                        fontSize: 12.0,
+                        fontSize: 14.0,
                       ),
                     ),
                   ),
@@ -126,7 +125,7 @@ class FileWidget extends StatelessWidget {
                             file.owners.map((element) => element.displayName))
                         .joinToString(),
                     style: TextStyle(
-                      fontSize: 12.0,
+                      fontSize: 14.0,
                     ),
                   ),
                 ],

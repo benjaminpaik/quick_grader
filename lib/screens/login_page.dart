@@ -9,9 +9,8 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sheetSelectorModel =
-    Provider.of<SheetSelectorModel>(context, listen: false);
-    sheetSelectorModel.handleSignIn(context);
+    final gradesModel = Provider.of<GradesModel>(context, listen: false);
+    gradesModel.handleSignIn(context);
     return Scaffold(
       body: Container(
         color: Colors.black,

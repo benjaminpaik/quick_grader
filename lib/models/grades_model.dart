@@ -15,7 +15,7 @@ final _defaultMaxPoints = 100;
 final _baseRow = 2;
 final _baseColumn = 1;
 
-class SheetSelectorModel extends ChangeNotifier {
+class GradesModel extends ChangeNotifier {
   SheetsApi _sheetsApi;
   GoogleSignInAccount _currentUser;
   List<File> _files = [];
@@ -29,7 +29,7 @@ class SheetSelectorModel extends ChangeNotifier {
   int _maxPoints;
   List<int> _gradesList;
 
-  SheetSelectorModel()
+  GradesModel()
       : _currentUser = null,
         _filePath = [],
         _spreadSheet = null,
@@ -83,7 +83,7 @@ class SheetSelectorModel extends ChangeNotifier {
           .map((val) => val.toString())
           .toList();
       _maxPoints = getAssignmentPoints(selection);
-      if(_maxPoints == 0) _maxPoints = _defaultMaxPoints;
+      if (_maxPoints == 0) _maxPoints = _defaultMaxPoints;
       int rowIndex = _assignmentIndex + 1;
       _gradesList = _spreadSheet.values.sublist(1).map((row) {
         try {
@@ -142,7 +142,6 @@ class SheetSelectorModel extends ChangeNotifier {
 
     GoogleSignInAuthentication authentication =
         await _currentUser.authentication;
-    print('authentication: $authentication');
     final client = MyClient(defaultHeaders: {
       'Authorization': 'Bearer ${authentication.accessToken}'
     });
@@ -188,7 +187,6 @@ class SheetSelectorModel extends ChangeNotifier {
 
     GoogleSignInAuthentication authentication =
         await _currentUser.authentication;
-    print('authentication: $authentication');
 
     ValueRange vr = new ValueRange.fromJson({
       "values": [

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:quick_grader/screens/students_page.dart';
+import 'package:quick_grader/screens/grades_page.dart';
 import 'models/grades_model.dart';
 import 'screens/login_page.dart';
 import 'screens/sheet_selector_page.dart';
@@ -13,8 +13,8 @@ class QuickGrade extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<SheetSelectorModel>(
-            create: (context) => SheetSelectorModel()),
+        ChangeNotifierProvider<GradesModel>(
+            create: (context) => GradesModel()),
       ],
       child: MaterialApp(
         title: 'Quick Grader',
@@ -25,7 +25,7 @@ class QuickGrade extends StatelessWidget {
         routes: {
           '/': (context) => LoginScreen(title: 'LOGIN'),
           '/sheets': (context) => SheetSelectorScreen(title: 'SHEETS'),
-          '/grades': (context) => StudentsScreen(title: 'STUDENTS'),
+          '/grades': (context) => GradesScreen(title: 'STUDENTS'),
         },
       ),
     );
