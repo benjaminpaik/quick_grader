@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_grader/models/grades_model.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quick_grader/widgets/custom_fab.dart';
 
 class GradesScreen extends StatelessWidget {
   final String title;
 
-  const GradesScreen({Key key, @required this.title}) : super(key: key);
+  const GradesScreen({this.title = ""});
 
   @override
   Widget build(BuildContext context) {
@@ -27,33 +28,39 @@ class GradesScreen extends StatelessWidget {
         alignment: Alignment.topCenter,
         child: _StudentListWidget(),
       ),
+      floatingActionButton: CustomFab(),
     );
   }
 }
 
 class _StudentListWidget extends StatelessWidget {
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Selector<GradesModel, List<List<Object>>>(
       selector: (_, sheetSelectorModel) =>
-          sheetSelectorModel.spreadSheet.values.sublist(1),
+          sheetSelectorModel.spreadSheet!.values!.sublist(1),
       builder: (context, students, child) {
-        return ListView.builder(
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            padding: EdgeInsets.all(0.0),
-            itemCount: students.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (index < students.length) {
+        return Scrollbar(
+          showTrackOnHover: true,
+          isAlwaysShown: true,
+          controller: _scrollController,
+          child: ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              padding: EdgeInsets.all(0.0),
+              itemCount: students.length,
+              itemBuilder: (BuildContext context, int index) {
+                final student =
+                    (index < students.length) ? students[index] : students.last;
                 return GestureDetector(
                   key: ObjectKey(index),
                   child: _StudentWidget(
-                      index, students[index].first.toString().toUpperCase()),
+                      index, student.first.toString().toUpperCase()),
                 );
-              } else {
-                return null;
-              }
-            });
+              }),
+        );
       },
     );
   }
@@ -61,7 +68,7 @@ class _StudentListWidget extends StatelessWidget {
 
 class _StudentWidget extends StatelessWidget {
   static final _studentFont =
-      GoogleFonts.iBMPlexMono(fontWeight: FontWeight.w500);
+      GoogleFonts.ibmPlexMono(fontWeight: FontWeight.w500);
   final String _studentName;
   final int studentIndex;
 
@@ -83,11 +90,19 @@ class _StudentWidget extends StatelessWidget {
           ],
         ),
       ),
-      SizedBox(
-          height: 75.0,
-          child: Container(
-            child: _GradeSliderWidget(studentIndex),
-          )),
+      Row(
+        children: <Widget>[
+          SizedBox(
+              height: 75.0,
+              width: 300.0,
+              child: _GradeSliderWidget(studentIndex)),
+          Expanded(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
       Divider(
         height: 20.0,
       ),
@@ -97,7 +112,9 @@ class _StudentWidget extends StatelessWidget {
 
 class _GradeDisplay extends StatelessWidget {
   final studentIndex;
+
   _GradeDisplay(this.studentIndex);
+
   @override
   Widget build(BuildContext context) {
     return Selector<GradesModel, int>(
@@ -116,6 +133,7 @@ class _GradeDisplay extends StatelessWidget {
 
 class _GradeSliderWidget extends StatelessWidget {
   final studentIndex;
+
   _GradeSliderWidget(this.studentIndex);
 
   @override
@@ -162,8 +180,10 @@ class _TabSelector extends StatelessWidget {
               height: 2,
               color: Colors.black,
             ),
-            onChanged: (String newValue) {
-              gradesModel.setSelectedTab(newValue);
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                gradesModel.setSelectedTab(newValue);
+              }
             },
             items: gradesModel.tabNames
                 .map<DropdownMenuItem<String>>((String value) {
@@ -195,8 +215,10 @@ class _AssignmentSelector extends StatelessWidget {
               height: 2,
               color: Colors.black,
             ),
-            onChanged: (String newValue) {
-              gradesModel.setSelectedAssignment(newValue);
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                gradesModel.setSelectedAssignment(newValue);
+              }
             },
             items: gradesModel.assignmentList
                 .map<DropdownMenuItem<String>>((String value) {

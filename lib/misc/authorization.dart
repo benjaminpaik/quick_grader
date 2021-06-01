@@ -10,7 +10,7 @@ GoogleSignIn _googleSignIn = GoogleSignIn(
 );
 
 class AuthManager {
-  static Future<GoogleSignInAccount> signIn() async {
+  static Future<GoogleSignInAccount?> signIn() async {
     try {
       final account = await _googleSignIn.signIn();
       print('account: ${account?.toString()}');
@@ -21,7 +21,7 @@ class AuthManager {
     }
   }
 
-  static Future<GoogleSignInAccount> signInSilently() async {
+  static Future<GoogleSignInAccount?> signInSilently() async {
     var account = await _googleSignIn.signInSilently();
     print("silent sign in");
     if(account == null) {

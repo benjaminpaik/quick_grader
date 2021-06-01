@@ -16,76 +16,71 @@ final _baseRow = 2;
 final _baseColumn = 1;
 
 class GradesModel extends ChangeNotifier {
-  SheetsApi _sheetsApi;
-  GoogleSignInAccount _currentUser;
+  SheetsApi? _sheetsApi;
+  GoogleSignInAccount? _currentUser;
   List<File> _files = [];
-  List<String> _filePath;
-  String _fileId;
-  ValueRange _spreadSheet;
-  List<String> _tabNames;
-  int _selectedTabIndex;
-  List<String> _assignmentList;
-  int _assignmentIndex;
-  int _maxPoints;
-  List<int> _gradesList;
-
-  GradesModel()
-      : _currentUser = null,
-        _filePath = [],
-        _spreadSheet = null,
-        _tabNames = [],
-        _assignmentList = [],
-        _gradesList = [],
-        _assignmentIndex = 0,
-        _maxPoints = _defaultMaxPoints,
-        _selectedTabIndex = 0;
+  List<String> _filePath = [];
+  String _fileId = "";
+  ValueRange? _spreadSheet;
+  List<String> _tabNames = [];
+  int _selectedTabIndex = 0;
+  List<String> _assignmentList = [];
+  int _assignmentIndex = 0;
+  int _maxPoints = _defaultMaxPoints;
+  List<int> _gradesList = [];
 
   UnmodifiableListView<File> get fileList => UnmodifiableListView(_files);
-  ValueRange get spreadSheet => _spreadSheet;
+
+  ValueRange? get spreadSheet => _spreadSheet;
+
   List<String> get tabNames => _tabNames;
+
   List<String> get assignmentList => _assignmentList;
+
   int get maxPoints => _maxPoints;
+
   String get selectedSheet {
-    if (_selectedTabIndex >= 0)
-      return _tabNames[_selectedTabIndex];
-    else
-      return null;
+    return _tabNames[_selectedTabIndex];
   }
 
   String get selectedAssignment {
-    if (_assignmentIndex >= 0)
-      return _assignmentList[_assignmentIndex];
-    else
-      return null;
+    return _assignmentList[_assignmentIndex];
   }
 
   void setSelectedTab(String selection) async {
-    _selectedTabIndex = _tabNames.indexOf(selection);
-    if (_selectedTabIndex >= 0) {
-      _spreadSheet = await _sheetsApi.spreadsheets.values
+    final index = _tabNames.indexOf(selection);
+    if (index >= 0) {
+      _selectedTabIndex = index;
+      _spreadSheet = await _sheetsApi?.spreadsheets.values
           .get(_fileId, _tabNames[_selectedTabIndex]);
-      _assignmentList = _spreadSheet.values.first
-          .sublist(1)
-          .map((val) => val.toString())
-          .toList();
-      setSelectedAssignment(_assignmentList.first);
-      notifyListeners();
+      _assignmentList = _spreadSheet?.values?.first
+              .sublist(1)
+              .map((val) => val.toString())
+              .toList() ??
+          [];
+
+      if (_assignmentList.isNotEmpty) {
+        setSelectedAssignment(_assignmentList.first);
+        notifyListeners();
+      }
     }
   }
 
   void setSelectedAssignment(String selection) async {
-    _assignmentIndex = _assignmentList.indexOf(selection);
-    if (_assignmentIndex >= 0) {
-      _spreadSheet = await _sheetsApi.spreadsheets.values
+    final index = _assignmentList.indexOf(selection);
+    if (index >= 0) {
+      _assignmentIndex = index;
+      _spreadSheet = await _sheetsApi?.spreadsheets.values
           .get(_fileId, _tabNames[_selectedTabIndex]);
-      _assignmentList = _spreadSheet.values.first
-          .sublist(1)
-          .map((val) => val.toString())
-          .toList();
+      _assignmentList = _spreadSheet?.values?.first
+              .sublist(1)
+              .map((val) => val.toString())
+              .toList() ??
+          [];
       _maxPoints = getAssignmentPoints(selection);
       if (_maxPoints == 0) _maxPoints = _defaultMaxPoints;
       int rowIndex = _assignmentIndex + 1;
-      _gradesList = _spreadSheet.values.sublist(1).map((row) {
+      _gradesList = _spreadSheet!.values!.sublist(1).map((row) {
         try {
           return int.parse(row[rowIndex].toString().trim());
         } catch (e) {
@@ -121,7 +116,7 @@ class GradesModel extends ChangeNotifier {
     }
 
     GoogleSignInAuthentication authentication =
-        await _currentUser.authentication;
+        await _currentUser!.authentication;
     final client = MyClient(defaultHeaders: {
       'Authorization': 'Bearer ${authentication.accessToken}'
     });
@@ -133,7 +128,10 @@ class GradesModel extends ChangeNotifier {
       $fields: "files(id, name, mimeType, createdTime, owners)",
       spaces: 'drive',
     );
-    _files = response.files;
+
+    if (response.files != null) {
+      _files = response.files!;
+    }
     notifyListeners();
   }
 
@@ -141,7 +139,7 @@ class GradesModel extends ChangeNotifier {
     if (_currentUser == null) return;
 
     GoogleSignInAuthentication authentication =
-        await _currentUser.authentication;
+        await _currentUser!.authentication;
     final client = MyClient(defaultHeaders: {
       'Authorization': 'Bearer ${authentication.accessToken}'
     });
@@ -149,29 +147,38 @@ class GradesModel extends ChangeNotifier {
     _fileId = fileId;
     _sheetsApi = SheetsApi(client);
 
-    final sheetInfo = await _sheetsApi.spreadsheets.get(_fileId);
-    _tabNames =
-        sheetInfo.sheets.map((sheet) => sheet.properties.title).toList();
+    final sheetInfo = await _sheetsApi?.spreadsheets.get(_fileId);
+    _tabNames = sheetInfo?.sheets
+            ?.map((sheet) => sheet.properties?.title ?? "")
+            .toList() ??
+        [];
 
     if (_tabNames.length > 0) {
       _spreadSheet =
-          await _sheetsApi.spreadsheets.values.get(_fileId, _tabNames.first);
-      _assignmentList = _spreadSheet.values.first
-          .sublist(1)
-          .map((val) => val.toString())
-          .toList();
-      setSelectedAssignment(_assignmentList.first);
-      Navigator.pushNamed(context, gradesRoute);
-      notifyListeners();
+          await _sheetsApi!.spreadsheets.values.get(_fileId, _tabNames.first);
+      _assignmentList = _spreadSheet?.values?.first
+              .sublist(1)
+              .map((val) => val.toString())
+              .toList() ??
+          [];
+
+      if (_assignmentList.isNotEmpty) {
+        setSelectedAssignment(_assignmentList.first);
+        Navigator.pushNamed(context, gradesRoute);
+        notifyListeners();
+      }
     }
   }
 
   Future<void> updateDirectory(BuildContext context, File file) async {
     String mimeType = file.mimeType.toString();
-    if (mimeType.contains("spreadsheet")) {
-      _loadSpreadsheet(context, file.id);
-    } else if (mimeType.contains("folder")) {
-      _loadFiles(file.id, true);
+
+    if (file.id != null) {
+      if (mimeType.contains("spreadsheet")) {
+        _loadSpreadsheet(context, file.id!);
+      } else if (mimeType.contains("folder")) {
+        _loadFiles(file.id!, true);
+      }
     }
   }
 
@@ -185,9 +192,6 @@ class GradesModel extends ChangeNotifier {
   Future<void> assignGrade(int studentIndex, int value) async {
     if (_currentUser == null || _assignmentIndex < 0) return;
 
-    GoogleSignInAuthentication authentication =
-        await _currentUser.authentication;
-
     ValueRange vr = new ValueRange.fromJson({
       "values": [
         [value.toString()]
@@ -196,8 +200,8 @@ class GradesModel extends ChangeNotifier {
 
     String writeRange =
         _getRange(_tabNames[_selectedTabIndex], _assignmentIndex, studentIndex);
-    if (writeRange != null) {
-      _sheetsApi.spreadsheets.values
+    if (writeRange.isNotEmpty) {
+      _sheetsApi?.spreadsheets.values
           .update(vr, _fileId, writeRange, valueInputOption: "USER_ENTERED");
       _gradesList[studentIndex] = value;
       notifyListeners();
@@ -223,7 +227,7 @@ class GradesModel extends ChangeNotifier {
 }
 
 String _getRange(String tabName, int assignmentIndex, int studentIndex) {
-  String rangeString;
+  String rangeString = "";
   // make sure both indices are valid
   if (assignmentIndex >= 0 && studentIndex >= 0) {
     String columnLetter = _getColumnLetter(_baseColumn + assignmentIndex);

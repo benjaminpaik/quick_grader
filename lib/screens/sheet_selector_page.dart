@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart';
 import 'package:provider/provider.dart';
 import 'package:quick_grader/models/grades_model.dart';
-import 'package:kt_dart/kt.dart';
 import 'package:intl/intl.dart';
 
 class SheetSelectorScreen extends StatelessWidget {
   final String title;
+  final String ADD_SHEET_TIP = "create a new grades spreadsheet";
 
-  const SheetSelectorScreen({Key key, @required this.title}) : super(key: key);
+  const SheetSelectorScreen({this.title = ""});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class SheetSelectorScreen extends StatelessWidget {
           },
         ),
         actions: <Widget>[
-          FlatButton(
+          TextButton(
             child: Text(
               'LOGOUT',
               style: TextStyle(color: Colors.white),
@@ -40,6 +40,11 @@ class SheetSelectorScreen extends StatelessWidget {
       body: Align(
         alignment: Alignment.topCenter,
         child: _SheetSelectorWidget(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: ADD_SHEET_TIP,
+        child: Icon(Icons.add),
+        onPressed: () {},
       ),
     );
   }
@@ -58,14 +63,13 @@ class _SheetSelectorWidget extends StatelessWidget {
             padding: EdgeInsets.all(0.0),
             itemCount: sheetList.length,
             itemBuilder: (BuildContext context, int index) {
-              if (index < sheetList.length) {
-                return GestureDetector(
-                  key: ObjectKey(index),
-                  child: FileWidget(sheetList[index]),
-                );
-              } else {
-                return null;
-              }
+              final file = (index < sheetList.length)
+                  ? sheetList[index]
+                  : sheetList.last;
+              return GestureDetector(
+                key: ObjectKey(index),
+                child: FileWidget(file),
+              );
             });
       },
     );
@@ -83,6 +87,12 @@ class FileWidget extends StatelessWidget {
     final fileColor = isSpreadsheet(file)
         ? Colors.green.withOpacity(0.8)
         : Colors.white.withOpacity(0.8);
+
+    final owners =
+        file.owners?.map((element) => element.displayName).join(" ") ?? "";
+    final createdTime =
+        file.createdTime != null ? formatter.format(file.createdTime!) : "";
+
     return Card(
       elevation: 0.0,
       margin: EdgeInsets.all(2.0),
@@ -101,7 +111,7 @@ class FileWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                file.name,
+                file.name ?? "",
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -113,7 +123,7 @@ class FileWidget extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      formatter.format(file.createdTime),
+                      createdTime,
                       style: TextStyle(
                         fontSize: 14.0,
                       ),
@@ -121,9 +131,7 @@ class FileWidget extends StatelessWidget {
                   ),
                   SizedBox(width: 8.0),
                   Text(
-                    KtList.from(
-                            file.owners.map((element) => element.displayName))
-                        .joinToString(),
+                    owners,
                     style: TextStyle(
                       fontSize: 14.0,
                     ),
@@ -140,12 +148,12 @@ class FileWidget extends StatelessWidget {
 
 class RippleWidget extends StatelessWidget {
   final Color color;
-  final Color highlightColor;
-  final Color splashColor;
-  final GestureTapCallback onTap;
-  final GestureLongPressCallback onLongPress;
+  final Color? highlightColor;
+  final Color? splashColor;
+  final GestureTapCallback? onTap;
+  final GestureLongPressCallback? onLongPress;
   final BorderRadius borderRadius;
-  final double radius;
+  final double? radius;
   final Widget child;
 
   RippleWidget({
@@ -156,7 +164,7 @@ class RippleWidget extends StatelessWidget {
     this.borderRadius = BorderRadius.zero,
     this.onTap,
     this.onLongPress,
-    this.child,
+    required this.child,
   });
 
   @override
@@ -167,8 +175,7 @@ class RippleWidget extends StatelessWidget {
         child: InkWell(
           splashColor: splashColor ?? color.withOpacity(0.3),
           highlightColor: highlightColor ?? color.withOpacity(0.2),
-          borderRadius:
-              radius != null ? BorderRadius.circular(radius) : borderRadius,
+          borderRadius: borderRadius,
           onTap: onTap,
           onLongPress: onLongPress,
           child: child,
