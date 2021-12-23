@@ -15,7 +15,7 @@ class GradesScreen extends StatelessWidget {
       appBar: AppBar(
         title: _TabSelector(),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushNamed(context, sheetsRoute);
           },
@@ -49,7 +49,7 @@ class _StudentListWidget extends StatelessWidget {
           child: ListView.builder(
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
-              padding: EdgeInsets.all(0.0),
+              padding: const EdgeInsets.all(0.0),
               itemCount: students.length,
               itemBuilder: (BuildContext context, int index) {
                 final student =
@@ -96,14 +96,14 @@ class _StudentWidget extends StatelessWidget {
               height: 75.0,
               width: 300.0,
               child: _GradeSliderWidget(studentIndex)),
-          Expanded(
+          const Expanded(
             child: DecoratedBox(
-              decoration: const BoxDecoration(color: Colors.red),
+              decoration: BoxDecoration(color: Colors.red),
             ),
           ),
         ],
       ),
-      Divider(
+      const Divider(
         height: 20.0,
       ),
     ]);
@@ -113,7 +113,7 @@ class _StudentWidget extends StatelessWidget {
 class _GradeDisplay extends StatelessWidget {
   final studentIndex;
 
-  _GradeDisplay(this.studentIndex);
+  const _GradeDisplay(this.studentIndex);
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +134,7 @@ class _GradeDisplay extends StatelessWidget {
 class _GradeSliderWidget extends StatelessWidget {
   final studentIndex;
 
-  _GradeSliderWidget(this.studentIndex);
+  const _GradeSliderWidget(this.studentIndex);
 
   @override
   Widget build(BuildContext context) {
@@ -172,10 +172,10 @@ class _TabSelector extends StatelessWidget {
         builder: (context, selectedSheet, child) {
           return DropdownButton<String>(
             value: selectedSheet,
-            icon: Icon(Icons.arrow_downward),
+            icon: const Icon(Icons.arrow_downward),
             iconSize: 24,
             elevation: 16,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             underline: Container(
               height: 2,
               color: Colors.black,
@@ -207,10 +207,10 @@ class _AssignmentSelector extends StatelessWidget {
         builder: (context, selectedAssignment, child) {
           return DropdownButton<String>(
             value: selectedAssignment,
-            icon: Icon(Icons.arrow_downward),
+            icon: const Icon(Icons.arrow_downward),
             iconSize: 24,
             elevation: 16,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
             underline: Container(
               height: 2,
               color: Colors.black,

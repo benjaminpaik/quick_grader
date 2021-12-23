@@ -1,6 +1,6 @@
 # quick_grader
 
-Quickly update student grades.
+An app to grade assignments from your phone
 
 ## Getting Started
 

@@ -16,7 +16,7 @@ class SheetSelectorScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             final sheetSelectorModel =
                 Provider.of<GradesModel>(context, listen: false);
@@ -25,7 +25,7 @@ class SheetSelectorScreen extends StatelessWidget {
         ),
         actions: <Widget>[
           TextButton(
-            child: Text(
+            child: const Text(
               'LOGOUT',
               style: TextStyle(color: Colors.white),
             ),
@@ -43,7 +43,7 @@ class SheetSelectorScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: ADD_SHEET_TIP,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () {},
       ),
     );
@@ -60,7 +60,7 @@ class _SheetSelectorWidget extends StatelessWidget {
         return ListView.builder(
             scrollDirection: Axis.vertical,
             shrinkWrap: true,
-            padding: EdgeInsets.all(0.0),
+            padding: const EdgeInsets.all(0.0),
             itemCount: sheetList.length,
             itemBuilder: (BuildContext context, int index) {
               final file = (index < sheetList.length)
@@ -95,7 +95,7 @@ class FileWidget extends StatelessWidget {
 
     return Card(
       elevation: 0.0,
-      margin: EdgeInsets.all(2.0),
+      margin: const EdgeInsets.all(2.0),
       shape: RoundedRectangleBorder(
         side: BorderSide(width: 1.0, color: Colors.black.withOpacity(0.4)),
       ),
@@ -118,21 +118,21 @@ class FileWidget extends StatelessWidget {
                   color: Colors.black.withOpacity(1.0),
                 ),
               ),
-              SizedBox(height: 10.0),
+              const SizedBox(height: 10.0),
               Row(
                 children: <Widget>[
                   Expanded(
                     child: Text(
                       createdTime,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14.0,
                       ),
                     ),
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   Text(
                     owners,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14.0,
                     ),
                   ),
@@ -156,7 +156,7 @@ class RippleWidget extends StatelessWidget {
   final double? radius;
   final Widget child;
 
-  RippleWidget({
+  const RippleWidget({
     this.color = Colors.blueAccent,
     this.splashColor,
     this.highlightColor,
@@ -169,17 +169,15 @@ class RippleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          splashColor: splashColor ?? color.withOpacity(0.3),
-          highlightColor: highlightColor ?? color.withOpacity(0.2),
-          borderRadius: borderRadius,
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: child,
-        ),
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        splashColor: splashColor ?? color.withOpacity(0.3),
+        highlightColor: highlightColor ?? color.withOpacity(0.2),
+        borderRadius: borderRadius,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: child,
       ),
     );
   }
