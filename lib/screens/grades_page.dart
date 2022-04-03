@@ -28,12 +28,13 @@ class GradesScreen extends StatelessWidget {
         alignment: Alignment.topCenter,
         child: _StudentListWidget(),
       ),
-      floatingActionButton: CustomFab(),
+      floatingActionButton: const CustomFab(),
     );
   }
 }
 
 class _StudentListWidget extends StatelessWidget {
+
   final _scrollController = ScrollController();
 
   @override
@@ -45,9 +46,12 @@ class _StudentListWidget extends StatelessWidget {
         return Scrollbar(
           showTrackOnHover: true,
           isAlwaysShown: true,
+          thickness: 20.0,
+          interactive: true,
           controller: _scrollController,
           child: ListView.builder(
               scrollDirection: Axis.vertical,
+              controller: _scrollController,
               shrinkWrap: true,
               padding: const EdgeInsets.all(0.0),
               itemCount: students.length,
@@ -86,21 +90,15 @@ class _StudentWidget extends StatelessWidget {
               style: _studentFont,
               textAlign: TextAlign.left,
             ),
-            _GradeDisplay(studentIndex),
           ],
         ),
       ),
       Row(
         children: <Widget>[
-          SizedBox(
-              height: 75.0,
-              width: 300.0,
-              child: _GradeSliderWidget(studentIndex)),
-          const Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(color: Colors.red),
-            ),
-          ),
+          Expanded(flex: 15, child: _GradeSliderWidget(studentIndex)),
+          const Spacer(),
+          Expanded(flex: 1, child: _GradeDisplay(studentIndex)),
+          const Spacer(flex: 3),
         ],
       ),
       const Divider(
