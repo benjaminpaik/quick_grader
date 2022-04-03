@@ -7,19 +7,19 @@ import 'package:googleapis/sheets/v4.dart';
 import '../misc/authorization.dart';
 import '../misc/my_client.dart';
 
-final loginRoute = '/';
-final sheetsRoute = '/sheets';
-final gradesRoute = '/grades';
+const loginRoute = '/';
+const sheetsRoute = '/sheets';
+const gradesRoute = '/grades';
 
-final _defaultMaxPoints = 100;
-final _baseRow = 2;
-final _baseColumn = 1;
+const _defaultMaxPoints = 100;
+const _baseRow = 2;
+const _baseColumn = 1;
 
 class GradesModel extends ChangeNotifier {
   SheetsApi? _sheetsApi;
   GoogleSignInAccount? _currentUser;
   List<File> _files = [];
-  List<String> _filePath = [];
+  final List<String> _filePath = [];
   String _fileId = "";
   ValueRange? _spreadSheet;
   List<String> _tabNames = [];
@@ -153,7 +153,7 @@ class GradesModel extends ChangeNotifier {
             .toList() ??
         [];
 
-    if (_tabNames.length > 0) {
+    if (_tabNames.isNotEmpty) {
       _spreadSheet =
           await _sheetsApi!.spreadsheets.values.get(_fileId, _tabNames.first);
       _assignmentList = _spreadSheet?.values?.first
@@ -192,7 +192,7 @@ class GradesModel extends ChangeNotifier {
   Future<void> assignGrade(int studentIndex, int value) async {
     if (_currentUser == null || _assignmentIndex < 0) return;
 
-    ValueRange vr = new ValueRange.fromJson({
+    ValueRange vr = ValueRange.fromJson({
       "values": [
         [value.toString()]
       ]

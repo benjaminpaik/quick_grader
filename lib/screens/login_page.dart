@@ -5,7 +5,7 @@ import 'package:quick_grader/models/grades_model.dart';
 class LoginScreen extends StatelessWidget {
   final String title;
 
-  const LoginScreen({this.title = ""});
+  const LoginScreen({Key? key, this.title = ""}) : super (key: key);
 
   @override
   Widget build(BuildContext context) {

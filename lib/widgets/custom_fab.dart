@@ -5,7 +5,7 @@ class CustomFab extends StatefulWidget {
   final String? tooltip;
   final IconData? icon;
 
-  CustomFab({this.onPressed, this.tooltip, this.icon});
+  const CustomFab({Key? key, this.onPressed, this.tooltip, this.icon}) : super (key: key);
 
   @override
   _CustomFabState createState() => _CustomFabState();
@@ -18,13 +18,13 @@ class _CustomFabState extends State<CustomFab>
   late Animation<Color?> _buttonColor;
   late Animation<double> _animateIcon;
   late Animation<double> _translateButton;
-  Curve _curve = Curves.easeOut;
-  double _fabHeight = 56.0;
+  final Curve _curve = Curves.easeOut;
+  final double _fabHeight = 56.0;
 
   @override
   initState() {
     _animationController =
-    AnimationController(vsync: this, duration: Duration(milliseconds: 500))
+    AnimationController(vsync: this, duration: const Duration(milliseconds: 500))
       ..addListener(() {
         setState(() {});
       });
@@ -35,7 +35,7 @@ class _CustomFabState extends State<CustomFab>
       end: Colors.red,
     ).animate(CurvedAnimation(
       parent: _animationController,
-      curve: Interval(
+      curve: const Interval(
         0.00,
         1.00,
         curve: Curves.linear,
@@ -71,49 +71,41 @@ class _CustomFabState extends State<CustomFab>
   }
 
   Widget add() {
-    return Container(
-      child: FloatingActionButton(
-        heroTag: "add",
-        onPressed: null,
-        tooltip: 'Add',
-        child: Icon(Icons.add),
-      ),
+    return const FloatingActionButton(
+      heroTag: "add",
+      onPressed: null,
+      tooltip: 'Add',
+      child: Icon(Icons.add),
     );
   }
 
   Widget image() {
-    return Container(
-      child: FloatingActionButton(
-        heroTag: "image",
-        onPressed: null,
-        tooltip: 'Image',
-        child: Icon(Icons.image),
-      ),
+    return const FloatingActionButton(
+      heroTag: "image",
+      onPressed: null,
+      tooltip: 'Image',
+      child: Icon(Icons.image),
     );
   }
 
   Widget inbox() {
-    return Container(
-      child: FloatingActionButton(
-        heroTag: "inbox",
-        onPressed: null,
-        tooltip: 'Inbox',
-        child: Icon(Icons.inbox),
-      ),
+    return const FloatingActionButton(
+      heroTag: "inbox",
+      onPressed: null,
+      tooltip: 'Inbox',
+      child: Icon(Icons.inbox),
     );
   }
 
   Widget toggle() {
-    return Container(
-      child: FloatingActionButton(
-        heroTag: "toggle",
-        backgroundColor: _buttonColor.value,
-        onPressed: animate,
-        tooltip: 'Toggle',
-        child: AnimatedIcon(
-          icon: AnimatedIcons.menu_close,
-          progress: _animateIcon,
-        ),
+    return FloatingActionButton(
+      heroTag: "toggle",
+      backgroundColor: _buttonColor.value,
+      onPressed: animate,
+      tooltip: 'Toggle',
+      child: AnimatedIcon(
+        icon: AnimatedIcons.menu_close,
+        progress: _animateIcon,
       ),
     );
   }

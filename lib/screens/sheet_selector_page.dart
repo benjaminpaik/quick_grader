@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 
 class SheetSelectorScreen extends StatelessWidget {
   final String title;
-  final String ADD_SHEET_TIP = "create a new grades spreadsheet";
+  final String addSheetTip = "create a new grades spreadsheet";
 
-  const SheetSelectorScreen({this.title = ""});
+  const SheetSelectorScreen({Key? key, this.title = ""}) : super (key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class SheetSelectorScreen extends StatelessWidget {
         child: _SheetSelectorWidget(),
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: ADD_SHEET_TIP,
+        tooltip: addSheetTip,
         child: const Icon(Icons.add),
         onPressed: () {},
       ),
@@ -80,7 +80,7 @@ class FileWidget extends StatelessWidget {
   final formatter = DateFormat('hh:mm EEE, MMM d, yyyy');
   final File file;
 
-  FileWidget(this.file);
+  FileWidget(this.file, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +157,7 @@ class RippleWidget extends StatelessWidget {
   final Widget child;
 
   const RippleWidget({
+    Key? key,
     this.color = Colors.blueAccent,
     this.splashColor,
     this.highlightColor,
@@ -165,7 +166,7 @@ class RippleWidget extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     required this.child,
-  });
+  }) : super (key: key);
 
   @override
   Widget build(BuildContext context) {

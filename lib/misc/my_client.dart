@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 
 class MyClient extends http.BaseClient {
   final Map<String, String> defaultHeaders;
-  http.Client _httpClient = new http.Client();
+  final http.Client _httpClient = http.Client();
 
   MyClient({this.defaultHeaders = const {}});
 

@@ -5,9 +5,12 @@ import 'models/grades_model.dart';
 import 'screens/login_page.dart';
 import 'screens/sheet_selector_page.dart';
 
-void main() => runApp(QuickGrade());
+void main() => runApp(const QuickGrade());
 
 class QuickGrade extends StatelessWidget {
+
+  const QuickGrade({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

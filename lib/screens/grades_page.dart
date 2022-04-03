@@ -7,7 +7,7 @@ import 'package:quick_grader/widgets/custom_fab.dart';
 class GradesScreen extends StatelessWidget {
   final String title;
 
-  const GradesScreen({this.title = ""});
+  const GradesScreen({Key? key, this.title = ""}) : super (key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class _StudentWidget extends StatelessWidget {
   final String _studentName;
   final int studentIndex;
 
-  _StudentWidget(this.studentIndex, this._studentName);
+  const _StudentWidget(this.studentIndex, this._studentName);
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +111,7 @@ class _StudentWidget extends StatelessWidget {
 }
 
 class _GradeDisplay extends StatelessWidget {
-  final studentIndex;
+  final int studentIndex;
 
   const _GradeDisplay(this.studentIndex);
 
@@ -132,7 +132,7 @@ class _GradeDisplay extends StatelessWidget {
 }
 
 class _GradeSliderWidget extends StatelessWidget {
-  final studentIndex;
+  final int studentIndex;
 
   const _GradeSliderWidget(this.studentIndex);
 
