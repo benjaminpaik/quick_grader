@@ -1,16 +1,12 @@
 # quick_grader
 
-An app to grade assignments from your phone
+An app to quickly grade assignments stored in a Google sheet.
 
-## Getting Started
+## Overview
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The purpose of this app was to provide a way for teachers to update 
+grades for various assignments from their phone. A Google sheet stored
+in the user's Google Drive is used as the database for all 
+assignments. The sheet tabs represent different periods, each row
+contains grades for a specific student, and each column represents a
+specific assignment.
